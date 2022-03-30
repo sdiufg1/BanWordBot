@@ -1,2 +1,0 @@
-token = "TOKEN"
-prefix = "PREFIX"

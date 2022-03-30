@@ -24,15 +24,16 @@ async def on_message(message):
             données = json.load(fp)
         for i in données["word"]:
             if i in verif:
-                await message.delete()
-                warn = await message.channel.send(f"{message.author.mention}mot interdit !")
-                time.sleep(3)
-                await warn.delete()
-            else:
-                print(message.content)
+                if message.author.id not in données["role"]:
+                    await message.delete()
+                    warn = await message.channel.send(f"{message.author.mention}mot interdit !")
+                    time.sleep(3)
+                    await warn.delete()
+                else:
+                    print(message.content)
 
-        with open(sorti, "w", encoding="utf-8") as fp:
-                    json.dump(données, fp, sort_keys=True, indent=4)        
+            with open(sorti, "w", encoding="utf-8") as fp:
+                        json.dump(données, fp, sort_keys=True, indent=4)        
     
 
 
@@ -115,6 +116,85 @@ async def listword(ctx):
 
     with open(sorti, "w", encoding="utf-8") as fp:
                     json.dump(données, fp, sort_keys=True, indent=4)
+
+
+
+
+
+@client.command()
+async def delbypass(ctx, member : discord.Member):
+        with open(entrée, "r", encoding="utf-8") as fp:
+            données = json.load(fp)
+
+
+        if member.id in données["role"]:
+            await ctx.send("Le role a bien étais supprimer de la liste bypass !")
+            données["role"].remove(member.id)
+            with open(sorti, "w", encoding="utf-8") as fp:
+                    json.dump(données, fp, sort_keys=True, indent=4)
+
+        else:
+            await ctx.send("L' id que vous venez de tapez n'ai pas dans la liste !")
+            with open(sorti, "w", encoding="utf-8") as fp:
+                    json.dump(données, fp, sort_keys=True, indent=4)
+
+
+
+
+@client.command()
+async def addbypass(ctx, member : discord.Member):
+        with open(entrée, "r", encoding="utf-8") as fp:
+            données = json.load(fp)
+
+
+        if member.id in données["role"]:
+            await ctx.send("cette id est deja dans la liste !")
+            with open(sorti, "w", encoding="utf-8") as fp:
+                    json.dump(données, fp, sort_keys=True, indent=4)
+
+        else:
+            données["role"].append(member.id)
+            await ctx.send("L' id a bien étais ajouter dans la liste !")
+            with open(sorti, "w", encoding="utf-8") as fp:
+                    json.dump(données, fp, sort_keys=True, indent=4)
+
+
+
+
+
+
+
+
+@client.command()
+async def listbypass(ctx):
+
+    with open(entrée, "r", encoding="utf-8") as fp:
+            données = json.load(fp)
+
+    s = "\n"
+
+    for objet in données["role"]:
+        s += "<@" + str(objet) + ">" + "\n"
+
+
+    if s == "\n":
+        await ctx.send(f"Tu n'a tjr pas mis de Joueur anti bypass uttilise **{prefix}addbypass** pour en ajouter !")
+    else:
+        embed=discord.Embed(title="Role bypass List", description="Voici la liste des role qui bypass les ban word c:", color=0x1a36c1)
+        embed.add_field(name="Role Bypass:", value=s, inline=True)
+        await ctx.send(embed=embed)
+
+
+
+
+    with open(sorti, "w", encoding="utf-8") as fp:
+                    json.dump(données, fp, sort_keys=True, indent=4)
+
+
+
+
+
+
 
 
 
