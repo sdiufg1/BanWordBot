@@ -17,23 +17,33 @@ client = commands.Bot(command_prefix = prefix)
 @client.event
 async def on_message(message):
     verif = message.content.lower()
+    verif = verif.replace(" ", "")
+    verif = verif.replace(".", "")
     if verif.startswith('*') == True:
         await client.process_commands(message)
     else:
-        with open(entrée, "r", encoding="utf-8") as fp:
-            données = json.load(fp)
-        for i in données["word"]:
-            if i in verif:
-                if message.author.id not in données["role"]:
-                    await message.delete()
-                    warn = await message.channel.send(f"{message.author.mention}mot interdit !")
-                    time.sleep(3)
-                    await warn.delete()
-                else:
-                    print(message.content)
+        if message.author.bot:
+            return
 
-            with open(sorti, "w", encoding="utf-8") as fp:
-                        json.dump(données, fp, sort_keys=True, indent=4)        
+        else:
+            with open(entrée, "r", encoding="utf-8") as fp:
+                données = json.load(fp)
+            for i in données["word"]:
+                if i in verif:
+                    
+                    if message.author.id not in données["role"]:
+                        if i == "":
+                            données["word"].remove("")
+                            with open(sorti, "w", encoding="utf-8") as fp:
+                                json.dump(données, fp, sort_keys=True, indent=4) 
+                        else:
+
+                            await message.delete()
+                            warn = await message.channel.send(f"{message.author.mention}mot interdit !")
+                            time.sleep(5)
+                            await warn.delete()
+                            with open(sorti, "w", encoding="utf-8") as fp:
+                                json.dump(données, fp, sort_keys=True, indent=4)     
     
 
 
@@ -43,9 +53,10 @@ async def on_message(message):
 
 
 @client.command()
-async def addword(ctx, mot):
+async def addword(ctx, *, mot):
         mot = mot.lower()
-        print(mot)
+        mot = mot.replace(" ", "")
+        mot = mot.replace(".", "")
         with open(entrée, "r", encoding="utf-8") as fp:
             données = json.load(fp)
 
@@ -71,7 +82,6 @@ async def addword(ctx, mot):
 @client.command()
 async def delword(ctx, mot):
         mot = mot.lower()
-        print(mot)
         with open(entrée, "r", encoding="utf-8") as fp:
             données = json.load(fp)
 
@@ -178,7 +188,7 @@ async def listbypass(ctx):
 
 
     if s == "\n":
-        await ctx.send(f"Tu n'a tjr pas mis de Joueur anti bypass uttilise **{prefix}addbypass** pour en ajouter !")
+        await ctx.send(f"Tu n'a tjr pas mis de Joueur anti bypass uttilise **+addbypass** pour en ajouter !")
     else:
         embed=discord.Embed(title="Role bypass List", description="Voici la liste des role qui bypass les ban word c:", color=0x1a36c1)
         embed.add_field(name="Role Bypass:", value=s, inline=True)
